@@ -1,6 +1,9 @@
 package com.example.esdemo.util;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.query_dsl.MatchAllQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.IndexResponse;
 import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
 import com.example.esdemo.entity.Document;
@@ -8,6 +11,7 @@ import com.example.esdemo.service.dto.DocumentDTO;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.util.function.Supplier;
 
 @Service
 public class ESUtil {
@@ -55,6 +59,21 @@ public class ESUtil {
         );
 
         return indexResponse;
+    }
+
+    public static Supplier<Query> supplier(){
+        return () -> Query.of(q -> q.matchAll(matchAllQuery()));
+    }
+
+    public static MatchAllQuery matchAllQuery() {
+        return  (new MatchAllQuery.Builder()).build();
+    }
+    public static Supplier<Query> supplierNameField(){
+        return () -> Query.of(q -> q.matchAll(matchAllQuery()));
+    }
+
+    public static MatchQuery matchAllQueryNameField(String name) {
+        return  (new MatchQuery.Builder()).field("name").query(name).analyzer("standard").build();
     }
 
 }
