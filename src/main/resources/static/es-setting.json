@@ -1,0 +1,80 @@
+{
+  "settings": {
+    "index": {
+      "number_of_shards": 1,
+      "number_of_replicas": 1,
+      "analysis": {
+        "analyzer": {
+          "my_analyzer": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "char_filter": [
+              "html_strip"
+            ],
+            "filter": [
+              "stop",
+              "custom_stop",
+              "asciifolding"
+            ]
+          }
+        },
+        "filter": {
+          "custom_stop": {
+            "type": "stop",
+            "stopwords": [
+              "a",
+              "an",
+              "and",
+              "are",
+              "as",
+              "at",
+              "be",
+              "but",
+              "by",
+              "for",
+              "if",
+              "in",
+              "into",
+              "is",
+              "it",
+              "no",
+              "not",
+              "of",
+              "on",
+              "or",
+              "such",
+              "that",
+              "the",
+              "their",
+              "then",
+              "there",
+              "these",
+              "they",
+              "this",
+              "to",
+              "was",
+              "will",
+              "with"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "id": {
+        "type": "text",
+        "analyzer": "my_analyzer"
+      },
+      "title": {
+        "type": "text",
+        "analyzer": "my_analyzer"
+      },
+      "content": {
+        "type": "text",
+        "analyzer": "my_analyzer"
+      }
+    }
+  }
+}
