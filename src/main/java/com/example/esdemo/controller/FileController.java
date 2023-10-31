@@ -1,6 +1,9 @@
 package com.example.esdemo.controller;
 
 
+import co.elastic.clients.elasticsearch._types.Result;
+import com.example.esdemo.service.ESDocumentService;
+import com.example.esdemo.service.dto.DocumentDTO;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -27,8 +30,11 @@ public class FileController {
     @Autowired
     private Tesseract tesseract;
 
+    @Autowired
+    private ESDocumentService esDocumentService;
+
     @PostMapping(value = "/api/pdf/extractText", consumes = "multipart/form-data")
-    public @ResponseBody ResponseEntity<String>
+    public @ResponseBody Result
     extractTextFromPDFFile(@RequestParam("file") MultipartFile file) {
         try {
             // Load file into PDFBox class
@@ -44,13 +50,46 @@ public class FileController {
             JSONObject obj = new JSONObject();
             obj.put("fileName", file.getOriginalFilename());
             obj.put("text", strippedText.toString());
+            System.out.println("strippedText: " + strippedText.toString());
+            DocumentDTO documentDTO = new DocumentDTO();
+            documentDTO.setContent(strippedText.toString());
+            documentDTO.setTitle(file.getOriginalFilename());
+            documentDTO.setId("File 1");
 
-            return new ResponseEntity<String>(obj.toString(), HttpStatus.OK);
+           return esDocumentService.createDocument(documentDTO, "document_demo");
+
+//            return new ResponseEntity<String>(obj.toString(), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new RuntimeException(e);
         }
 
     }
+
+
+//    @PostMapping(value = "/api/doc/extractText", consumes = "multipart/form-data")
+//    public @ResponseBody ResponseEntity<String>
+//    extractTextFromPDFFile(@RequestParam("file") MultipartFile file) {
+//        try {
+//            // Load file into PDFBox class
+//            PDDocument document =  PDDocument.load(file.getBytes());
+//            PDFTextStripper stripper = new PDFTextStripper();
+//            String strippedText = stripper.getText(document);
+//
+//            // Check text exists into the file
+//            if (strippedText.trim().isEmpty()){
+//                strippedText = extractTextFromScannedDocument(document);
+//            }
+//
+//            JSONObject obj = new JSONObject();
+//            obj.put("fileName", file.getOriginalFilename());
+//            obj.put("text", strippedText.toString());
+//
+//            return new ResponseEntity<String>(obj.toString(), HttpStatus.OK);
+//        } catch (Exception e) {
+//            return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//
+//    }
 
     private String extractTextFromScannedDocument(PDDocument document) throws IOException, TesseractException {
 
